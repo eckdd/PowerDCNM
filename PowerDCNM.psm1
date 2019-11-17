@@ -209,7 +209,7 @@ Session Authentication Access Token
     (
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
             [string]$uri,
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$object,
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$AuthToken="$Global:DCNMAuthToken"
@@ -235,11 +235,15 @@ add-type @"
          
 Process {
 $headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json" ; 'Accept' = "application/json"}
-
+if ($body) {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Post -Uri $uri -Headers $headers -Body $object
-  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $object - }
-
+  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $object }
+ } else {
+  if ($IsCore -eq $true) {
+  $response = Invoke-RestMethod -SkipCertificateCheck -Method Post -Uri $uri -Headers $headers
+  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers }
+ }
         }
 End     {
 $response
@@ -595,6 +599,35 @@ $body = New-Object -TypeName psobject
 $body | Add-Member -MemberType NoteProperty -Name networkNames -Value $Network
    if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
     $response = New-DCNMObject -uri $uri -object ($body | ConvertTo-Json) ; $response}
+        }
+End     {}
+}
+function Deploy-DCNMFabric           {
+    <#
+ .SYNOPSIS
+Deploy pending changes to a fabric
+ .DESCRIPTION
+This cmdlet will invoke a REST get against the DCNM API Control - Fabric Operations
+ .EXAMPLE
+Deploy-DCNMFabric -Fabric SITE-3
+ .PARAMETER Fabric
+Name of a fabric
+/#>
+param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+            [string]$Fabric,
+        [Parameter(Mandatory=$false)]
+            [switch]$NoSync,
+        [Parameter(Mandatory=$false, DontShow)]
+            [switch]$JSON
+    )
+Begin   {}
+Process {
+if ($NoSync) {$SyncFlag = 'false'} else {$SyncFlag = 'true'}
+$uri  = "$Global:DCNMHost/rest/control/fabrics/$Fabric/config-deploy?forceShowRun=$SyncFlag"
+   if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
+    $response = New-DCNMObject -uri $uri ; $response}
         }
 End     {}
 }
