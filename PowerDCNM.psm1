@@ -189,6 +189,69 @@ End     {
 $response
         }
 }
+function Remove-DCNMObject           {
+    <#
+ .SYNOPSIS
+Deletes an object from the REST API
+ .DESCRIPTION
+This cmdlet will invoke a REST delete against the DCNM API path
+ .EXAMPLE
+$uri = https://dcnm.dcloud.cisco.com/rest/control/fabrics
+Get-DCNMObject -uri $uri
+ .PARAMETER uri
+Resource location
+ .PARAMETER AuthAccessToken
+Session Authentication Access Token
+/#>
+param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+            [string]$uri,
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+            [string]$AuthToken="$Global:DCNMAuthToken"
+    )
+Begin   {
+if ($PSEdition -eq 'Core') {$IsCore=$true} else {
+$IsCore=$false
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+[System.Net.ServicePointManager]::SecurityProtocol = 'Tls12'
+ }
+}
+Process {
+
+$headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/x-www-form-urlencoded" ; 'cache-control' = "no-cache"}
+#try {
+  if ($IsCore -eq $true) {
+  $response = Invoke-RestMethod -SkipCertificateCheck -Method Delete -Uri $uri -Headers $headers
+  } else { $response = Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers }
+ #} catch {
+ # $message = $_.Exception.Message
+ # if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
+ # Write-Host $message -ForegroundColor Yellow
+ # New-DCNMAuthToken
+ #  }  
+ # if ($message -eq 'Response status code does not indicate success: 401 (Unauthorized).') {
+ # Write-Host $message -ForegroundColor Yellow
+ # New-DCNMAuthToken -DCNMHost $env:DCNMHost
+ #  }  
+ #}
+
+        }
+End     {
+$response
+        }
+}
 function New-DCNMObject              {
 <#
  .SYNOPSIS
@@ -269,7 +332,7 @@ Session Authentication Access Token
     (
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
             [string]$uri,
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$object,
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$AuthToken="$Global:DCNMAuthToken"
@@ -317,15 +380,16 @@ End     {
 $response
         }
 }
+
 function Remove-DCNMObject           {
-        <#
+    <#
  .SYNOPSIS
-Removes an object via the REST API
+Retrieves a new object to the REST API
  .DESCRIPTION
-This cmdlet will invoke a REST delete method against a URI
+This cmdlet will invoke a REST get against the DCNM API path
  .EXAMPLE
-$uri = https://dcnm.dcloud.cisco.com/api/fmc_config/v1/domain/e276abec-e0f2-11e3-8169-6d9ed49b625f/policy/accesspolicies/005056BB-0B24-0ed3-0000-399431961128/accessrules/005056BB-0B24-0ed3-0000-000268479706
-Remove-DCNMObject -uri $uri
+$uri = https://dcnm.dcloud.cisco.com/rest/control/fabrics
+Get-DCNMObject -uri $uri
  .PARAMETER uri
 Resource location
  .PARAMETER AuthAccessToken
@@ -333,12 +397,10 @@ Session Authentication Access Token
 /#>
 param
     (
-        [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
             [string]$uri,
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-            [string]$AuthToken="$env:DCNMAuthToken",
-        [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
-            $Object
+            [string]$AuthToken="$Global:DCNMAuthToken"
     )
 Begin   {
 if ($PSEdition -eq 'Core') {$IsCore=$true} else {
@@ -359,28 +421,28 @@ add-type @"
  }
 }
 Process {
-if ($Object) { $uri = $Object.links.self }
-$headers = @{ "X-auth-access-token" = "$AuthToken" }
 
-try {
- if ($IsCore -eq $true) {
- $response = Invoke-RestMethod -SkipCertificateCheck -Method Delete -Uri $uri -Headers $headers
- } else { $response = Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers }
-} catch {
-  $message = $_.Exception.Message
-  if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
-  Write-Host $message -ForegroundColor Yellow
-  New-DCNMAuthToken
-   }  
-  if ($message -eq 'Response status code does not indicate success: 401 (Unauthorized).') {
-  Write-Host $message -ForegroundColor Yellow
-  New-DCNMAuthToken -DCNMHost $env:DCNMHost
-   }  
- }
+$headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/x-www-form-urlencoded" ; 'cache-control' = "no-cache"}
+#try {
+  if ($IsCore -eq $true) {
+  $response = Invoke-RestMethod -SkipCertificateCheck -Method Delete -Uri $uri -Headers $headers
+  } else { $response = Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers }
+ #} catch {
+ # $message = $_.Exception.Message
+ # if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
+ # Write-Host $message -ForegroundColor Yellow
+ # New-DCNMAuthToken
+ #  }  
+ # if ($message -eq 'Response status code does not indicate success: 401 (Unauthorized).') {
+ # Write-Host $message -ForegroundColor Yellow
+ # New-DCNMAuthToken -DCNMHost $env:DCNMHost
+ #  }  
+ #}
 
+        }
+End     {
 $response
         }
-End {Remove-Variable -Name DCNM_* -Scope Global}
 }
 
 ###### Core Functions ######
@@ -732,7 +794,7 @@ foreach ($fab in $Fabrics) {
   }
    if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject @($body) -Depth 10) ; $Global:DCNM_JSON} else {
     $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject @($body) -Depth 10) ; $response 
-    if ((select -InputObject $response -ExpandProperty *) -eq 'SUCCESS' -and !$DoNotDeploy) {
+    if ((Select-Object -InputObject $response -ExpandProperty *) -eq 'SUCCESS' -and !$DoNotDeploy) {
      foreach ($net in $body.networkName) {
       Deploy-DCNMNetwork -Network $net -Fabric $fab
      }
@@ -951,8 +1013,7 @@ Remove-Variable -Name ID,templateName,nvPairs,body                              
 End     {}
  
 }
-
-function New-DCNMSubinterface         {
+function New-DCNMSubinterface        {
     <#
  .SYNOPSIS
 Creates a new subinterface interface
@@ -1065,4 +1126,73 @@ Remove-Variable nvPairs,body,IPv6Prefix,Prefix,VlanID,Fabric,description,ParentI
 
 End     {}
  
+}
+function Get-DCNMSwitchPolicy        {
+    <#
+ .SYNOPSIS
+Retrieve a policies applied to switches
+ .DESCRIPTION
+This cmdlet will invoke a REST get against the DCNM API Control - Policies
+ .EXAMPLE
+
+ .EXAMPLE
+
+ .PARAMETER Fabric
+
+ .PARAMETER Name
+
+ /#>
+param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+            [string]$serialNumber,
+            [Parameter(Mandatory=$false, ValueFromPipeline=$false)]
+            [string]$Description="*"
+    )
+Begin   {
+$response=@()
+}
+Process {
+$uri = "$Global:DCNMHost/rest/control/policies/switches/$serialNumber"
+$response += Get-DCNMObject -uri $uri | Where-Object {($_.nvPairs.POLICY_DESC -like "$Description") -or ($_.description -like "$Description")}
+        }
+End     {
+$response
+        }
+}
+function Remove-DCNMPolicy           {
+    <#
+ .SYNOPSIS
+Remove a policies
+ .DESCRIPTION
+This cmdlet will invoke a REST get against the DCNM API Control - Policies
+ .EXAMPLE
+Remove-DCNMPolicy -policyId POLICY-245910
+ .EXAMPLE
+Get-DCNMSwitch -fabricName site1 -SwitchName LEAF-1 | Get-DCNMSwitchPolicy | ? {$_.deleted -eq $true} | Remove-DCNMPolicy -Purge
+ .PARAMETER Fabric
+
+ .PARAMETER Name
+
+ /#>
+param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+            [string]$policyId,
+            [Parameter(Mandatory=$false)]
+            [switch]$Purge
+    )
+Begin   {
+$response=@()}
+Process {
+   if ($Purge) {
+                $uri = "$Global:DCNMHost/rest/control/policies/$policyId"
+                $response += Remove-DCNMObject -uri $uri} else {
+                $uri = "$Global:DCNMHost/rest/control/policies/$policyId/mark-delete"
+                $response += Set-DCNMObject -uri $uri
+               } 
+              }
+End     {
+$response
+        }
 }
