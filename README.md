@@ -40,7 +40,7 @@ del .\master.zip
 
 # Usage 
 
-Begin by generating  an Auth Access Token with the New-DCNMAuthToken function. This will prompt for the FMC host URL and credentials with API access. Once ran, a token valid for 60 minutes will be stored in the current PowerShell session environment and all other functions can be used without specifying the token, domain, or FMC host.
+Begin by generating  an Auth Access Token with the New-DCNMAuthToken function. This will prompt for the DCNM host URL and credentials with API access. Once ran, a token valid for 60 minutes will be stored in the current PowerShell session environment and all other functions can be used without specifying the token, domain, or DCNM host.
 Get-Command -Module PowerDCNM will display all the functions available in this module. Use Get-Help with the name of the function followed by -Examples to see examples of usage.
 
 More functions will continue to be added in the future, and usage of existing functions is subject to change. Pay attention to the release notes and current issues page for information on new features and bugs.
