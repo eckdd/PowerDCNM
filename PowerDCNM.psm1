@@ -544,20 +544,35 @@ Configures Ethernet interfaces
  .DESCRIPTION
 This cmdlet will invoke a REST POST against the DCNM API Global Interface
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName SPINE-4 -Interface eth1/19 -Description test -Speed 100Gb -Layer3 -Prefix 30.30.30.30/24 -Tag 76894 -VRF myvrf
+Set-DCNMInterface -Fabric site3 -SwitchName SPINE-4 -Interface eth1/19 -Description test -Speed 100Gb -Mode Routed -Prefix 30.30.30.30/24 -Tag 76894 -VRF myvrf
+
+# Configure eth1/19 as a routed port, add description of "test", set the speed to 100Gb, configure 30.30.30.30/24 as the IP Address
+# Set a tag of 76894, and place in the VRF "myvrf"
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/40-45,eth1/50-55,eth1/100' -Access -AccessVLAN 2020
+Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/40-45,eth1/50-55,eth1/100' -Mode Access -AccessVLAN 2020
+
+# Configure eth1/40-45,eth1/50-55,eth1/100 as access ports in VLAN 2020
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/40-45,eth1/50-55,eth1/100' -Trunk -Enabled true -AllowedVLANs none
+Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/40-45,eth1/50-55,eth1/100' -Mode Trunk -Enabled true -AllowedVLANs none
+
+# Configure eth1/40-45,eth1/50-55,eth1/100 as trunk ports with no allowed VLANs. 
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/101,eth1/105-110' -Freeform -CliFreeform @"
+Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface 'eth1/101,eth1/105-110' -Mode Freeform -CliFreeform @"
 >> description Unnumbered Links
 >> no switchport
 >> medium p2p
->> ip unnumbered loopback0
->> "@
+>> ip unnumbered loopback70
+>> "@ -Enabled true
+
+# Use the freeform template to create an unnumbered routed interface
+ .EXAMPLE
+Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface eth1/10 -Mode Monitor
+
+# Use the monitor template on eth1/10 to prevent DCNM from enforcing configuration complaince on that interface
  .EXAMPLE
 (Import-Csv .\Book2.csv)[2..4] | New-DCNMInterface
+
+# Use a CSV file with headers corresponding to parameters to bulk-import interface configurations
  .PARAMETER Fabric
 Name of the fabric
  .PARAMETER SwitchName
@@ -580,14 +595,10 @@ Enables or disables BPDUGuard
 MTU for Access or Trunk ports; can be Jumbo (9216) or default (1500)
  .PARAMETER PortFast
 Enable/disable spanning-tree port-fast
- .PARAMETER Access
-Specifies access port
+ .PARAMETER Mode
+Specifies whether to use the access, trunk, routed, or monitor template
  .PARAMETER AccessVLAN
 Access port VLAN 
- .PARAMETER Trunk
-Specifies trunk port
- .PARAMETER Layer3
-Specifies layer-3/routed port
  .PARAMETER AllowedVLANs
 Configures allowed VLAN list for trunk port-channels.
 Options include "all", "none", ranges, or comma-separated values
@@ -605,81 +616,68 @@ Freeform interfaces configuration
 param
     (
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("fabricName")]
             [string]$Fabric,
+
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("sysName")]
             [string]$SwitchName,
+
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
-            [string]$Interface,
+        [Alias("ifName")]
+        [string]$Interface,
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-            [string]$Description="",
+            [string]$PortDescription="",
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateSet("true","false")]
             [string]$Enabled="true",
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Freeform')]
-            [switch]$Freeform,
-    
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-        [Parameter(ParameterSetName='Trunk')]
-        [Parameter(ParameterSetName='Layer3')]
         [ValidateSet("Auto","100Mb","1Gb","10Gb","25Gb","40Gb","100Gb")]
             [string]$Speed="Auto",
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-        [Parameter(ParameterSetName='Trunk')]
         [ValidateSet("true","false","no")]
            [string]$BPDUGuard="true",
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-        [Parameter(ParameterSetName='Trunk')]
         [ValidateSet("jumbo","default")]
             [string]$MTU_L2="jumbo",
    
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-        [Parameter(ParameterSetName='Trunk')]
         [ValidateSet("true","false")]
             [string]$PortFast="true",
-    
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-            [switch]$Access,
+        [ValidateSet("Access","Trunk","Routed","Freeform","Monitor")]
+            [string]$Mode,
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateRange(1,4094)]
-        [Parameter(ParameterSetName='Access')]
             [int]$AccessVLAN,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Trunk')]
-            [switch]$Trunk,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Trunk')]
             [string]$AllowedVLANs,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
         [ValidateRange(576,9216)]
             [int]$MTU_L3="9216",
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
-            [switch]$Layer3,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
             [string]$VRF="",
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
+        [AllowNull()] 
+        [AllowEmptyCollection()]
         [ValidatePattern('(\d+\.){3}\d+\/\d+')]
             [string]$Prefix,
-        [Parameter(ParameterSetName='Layer3')]
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateRange(0,4294967295)]
             [string]$Tag="",
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$CliFreeform="",
          
@@ -689,7 +687,7 @@ param
 Begin   {
 }
 Process {
-[string]$Interface = $Interface.ToLower()
+[string]$Interface = $Interface.ToLower().Replace('ethernet','eth')
 
     $ifNames = @()
     foreach ($EthMod in $Interface.split('eth', [System.StringSplitOptions]::RemoveEmptyEntries)) {
@@ -732,30 +730,30 @@ $nvPairs | Add-Member -Type NoteProperty -Name CONF                       -Value
 $nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE                -Value $Enabled
 
 
-if ($Access)  {
+if ($Mode -eq 'Access')  {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_access_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
     $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
     $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
     $nvPairs | Add-Member -Type NoteProperty -Name ACCESS_VLAN              -Value $AccessVLAN
     }
 
-if ($Trunk)   {
+if ($Mode -eq 'Trunk')   {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_trunk_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
     $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
     $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
     $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS            -Value $AllowedVLANs
     }
 
-if ($Layer3)  {
+if ($Mode -eq 'Routed')  {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_routed_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
     $nvPairs | Add-Member -Type NoteProperty -Name INTF_VRF                 -Value $VRF
     $nvPairs | Add-Member -Type NoteProperty -Name IP                       -Value ($Prefix.Split('/')[0])
     $nvPairs | Add-Member -Type NoteProperty -Name PREFIX                   -Value ($Prefix.Split('/')[1])
@@ -763,8 +761,12 @@ if ($Layer3)  {
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L3
     }
 
-if ($freeform) {
+if ($Mode -eq 'Freeform') {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_freeform'
+}
+
+if ($Mode -eq 'Monitor') {
+    $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_monitor_ethernet_11_1'
 }
 
 $ints=@()
@@ -784,10 +786,16 @@ $body | Add-Member -Type NoteProperty -Name interfaces -Value $ints
 
     if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
         $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject $body -Depth 10) ; $response}
-    
-Remove-Variable -Name BPDUGuard,Speed,Fabric,Description,MTU_L3,MTU_L2,Enabled     -ErrorAction SilentlyContinue
-Remove-Variable -Name VRF,Prefix,Tag,AllowedVLANs,AccessVLAN,PortFast              -ErrorAction SilentlyContinue
-Remove-Variable -Name interface,interfaces,nvPairs,body                            -ErrorAction SilentlyContinue
+
+Remove-Variable -Name nvPairs,body -ErrorAction SilentlyContinue
+#Remove-Variable -Name BPDUGuard,Speed,Fabric,Description,MTU_L3,MTU_L2,Enabled     -ErrorAction SilentlyContinue
+#Remove-Variable -Name VRF,Prefix,Tag,AllowedVLANs,AccessVLAN,PortFast              -ErrorAction SilentlyContinue
+#Remove-Variable -Name interface,interfaces,nvPairs,body,Mode                       -ErrorAction SilentlyContinue
+$calls++
+while ($calls -ge 80) {
+    Start-Sleep -Seconds 10 
+    [int]$calls = 0
+    }
 }    
 
 End     {}
@@ -1401,7 +1409,7 @@ Get-DCNMSwitch -fabricName site1 -SwitchName LEAF-1 | Get-DCNMSwitchPolicy | ? {
  /#>
 param
     (
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true, ValueFromPipeline=$true)]
             [string]$policyId,
             [Parameter(Mandatory=$false)]
             [switch]$Purge
@@ -1418,5 +1426,180 @@ Process {
               }
 End     {
 $response
+        }
+}
+
+function New-DCNMNetwork           {
+    <#
+ .SYNOPSIS
+Creates a network in a fabric
+ .DESCRIPTION
+This cmdlet will invoke a REST POST against the DCNM Top Down LAN Network Operations API
+ .EXAMPLE
+New-DCNMNetwork -Fabric site1 -vrf myVRF1 -Name myNetwork1 -VNI 30001 -VlanID -VlanName test -GatewayIPv4 '10.10.10.1' 
+ .EXAMPLE
+(Import-Csv .\Book2.csv) | New-DCNMNetwork
+ .PARAMETER Fabric
+Fabric name
+ .PARAMETER Name
+Network name
+ .PARAMETER VNI
+VNI number
+ .PARAMETER GatewayIPv4
+IPv4 gateway address
+ .PARAMETER GatewayIPv6
+IPv6 gateway address
+ .PARAMETER VlanName
+VLAN name 
+ .PARAMETER Description
+Interface description for gateway SVI
+ .PARAMETER MTU
+MTU size for gateway SVI (68-9216)
+ .PARAMETER SecondaryGW1
+Primary IP for gateway SVI
+ .PARAMETER SecondaryGW2
+Secondary IP for gateway SVI
+ .PARAMETER SuppressARP
+Enable ARP suppression; true or false
+ .PARAMETER RTBothAuto
+Use route-target both in configuration profile
+ .PARAMETER EnableL3onBorder
+Create gateway SVI on border leaf switches; true or false
+ .PARAMETER DhcpServer1
+First DHCP server
+ .PARAMETER DhcpServer2
+Second DHCP server
+ .PARAMETER DhcpVRF
+VRF of DHCP relay source
+ .PARAMETER DhcpLoopbackID
+Loopback ID for DHCP relay source (0-1023)
+ .PARAMETER Tag
+Route tag for the gateway subnet
+ .PARAMETER IsLayer2Only
+Specify network is L2; will not create a gateway
+ .PARAMETER IR
+Enable Ingress Replication; true or false
+ .PARAMETER TRM
+Enable Tenent Routed Multicast; true or false
+ .PARAMETER VlanID
+VLAN ID to be associated with VNI or L3 SVI
+ .PARAMETER MulticastGroup
+Multicast group address for BUM traffic
+ /#>
+param
+    (
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [string]$Fabric,
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [string]$Name,            
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [int]$VNI,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$GatewayIPv4,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$GatewayIPv6,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$VlanName,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$Description,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateRange(68,9216)]
+        [int]$MTU=9216,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$SecondaryGW1,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$SecondaryGW2,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$SuppressARP="false",            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$RTBothAuto="false",            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$EnableL3onBorder="false",            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$DhcpServer1,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$DhcpServer2,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$DhcpVRF,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$DhcpLoopbackID,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateRange(0,4294967295)]
+        [int]$Tag=12345,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$VRF,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [string]$MulticastGroup,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$IsLayer2Only="false",  
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$IR="false",            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateSet("true","false")]
+        [string]$TRM="false",            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+    [ValidateRange(2,3967)]
+        [int]$VlanID,            
+    [Parameter(Mandatory=$false, DontShow)]
+        [switch]$JSON
+        
+    )
+Begin   {
+$response=@()
+$uri    = "$Global:DCNMHost/rest/top-down/bulk-create/networks"
+$body   =@()
+}
+Process {
+    if ($IsLayer2Only -eq 'true') {$VRF = 'NA'}
+
+    $netconfig  = @()
+    $netconfig += "`"gatewayIpAddress`":`"$GatewayIPv4`","
+    $netconfig += "`"gatewayIpV6Address`":`"$GatewayIPv6`","
+    $netconfig += "`"vlanName`":`"$VlanName`","
+    $netconfig += "`"intfDescription`":`"$Description`","
+    $netconfig += "`"mtu`":`"$MTU`","
+    $netconfig += "`"secondaryGW1`":`"$SecondaryGW1`","
+    $netconfig += "`"secondaryGW2`":`"$SecondaryGW2`","
+    $netconfig += "`"suppressArp`":$SuppressARP,"
+    $netconfig += "`"enableIR`":$IR,"
+    $netconfig += "`"trmEnabled`":$TRM,"
+    $netconfig += "`"rtBothAuto`":$RTBothAuto,"
+    $netconfig += "`"enableL3OnBorder`":$EnableL3onBorder,"
+    $netconfig += "`"mcastGroup`":`"$MulticastGroup`","
+    $netconfig += "`"dhcpServerAddr1`":`"$DhcpServer1`","
+    $netconfig += "`"dhcpServerAddr2`":`"$DhcpServer2`","
+    $netconfig += "`"vrfDhcp`":`"$DhcpVRF`","
+    $netconfig += "`"loopbackId`":`"$DhcpLoopbackID`","
+    $netconfig += "`"tag`":`"$tag`","
+    $netconfig += "`"vrfName`":`"$VRF`","
+    $netconfig += "`"isLayer2Only`":$IsLayer2Only,"
+    $netconfig += "`"nveId`":1,"
+    $netconfig += "`"vlanId`":`"$VlanID`","
+    $netconfig += "`"segmentId`":`"$VNI`","
+    $netconfig += "`"networkName`":`"$name`""
+    $netconfig  = $netconfig -join ''
+
+    $LanNet = New-Object -TypeName psobject
+    $LanNet | Add-Member -Type NoteProperty -Name 'fabric'                      -Value $Fabric
+    $LanNet | Add-Member -Type NoteProperty -Name 'vrf'                         -Value $VRF
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkName'                 -Value $Name
+    $LanNet | Add-Member -Type NoteProperty -Name 'displayName'                 -Value $Name
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkId'                   -Value "$VNI"
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkTemplateConfig'       -Value "`{$netconfig`}"
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkTemplate'             -Value 'Default_Network_Universal'
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkExtensionTemplate'    -Value 'Default_Network_Extension_Universal'
+    $LanNet | Add-Member -Type NoteProperty -Name 'source'                      -Value $null
+    $LanNet | Add-Member -Type NoteProperty -Name 'serviceNetworkTemplate'      -Value $null
+
+    $body += $LanNet
+        }
+End     {
+    if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
+        $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject $body -Depth 10) ; $response}
         }
 }
