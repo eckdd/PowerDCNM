@@ -1545,9 +1545,12 @@ param
     [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
     [ValidateRange(2,3967)]
         [int]$VlanID,            
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true, DontShow)]
+        [string]$networkTemplate="Default_Network_Universal",
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true, DontShow)]
+        [string]$networkExtensionTemplate="Default_Network_Extension_Universal",
     [Parameter(Mandatory=$false, DontShow)]
         [switch]$JSON
-        
     )
 Begin   {
 $response=@()
@@ -1591,8 +1594,8 @@ Process {
     $LanNet | Add-Member -Type NoteProperty -Name 'displayName'                 -Value $Name
     $LanNet | Add-Member -Type NoteProperty -Name 'networkId'                   -Value "$VNI"
     $LanNet | Add-Member -Type NoteProperty -Name 'networkTemplateConfig'       -Value "`{$netconfig`}"
-    $LanNet | Add-Member -Type NoteProperty -Name 'networkTemplate'             -Value 'Default_Network_Universal'
-    $LanNet | Add-Member -Type NoteProperty -Name 'networkExtensionTemplate'    -Value 'Default_Network_Extension_Universal'
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkTemplate'             -Value $networkTemplate
+    $LanNet | Add-Member -Type NoteProperty -Name 'networkExtensionTemplate'    -Value $networkExtensionTemplate
     $LanNet | Add-Member -Type NoteProperty -Name 'source'                      -Value $null
     $LanNet | Add-Member -Type NoteProperty -Name 'serviceNetworkTemplate'      -Value $null
 
