@@ -1545,9 +1545,9 @@ param
     [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
     [ValidateRange(2,3967)]
         [int]$VlanID,            
-    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true, DontShow)]
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [string]$networkTemplate="Default_Network_Universal",
-    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true, DontShow)]
+    [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [string]$networkExtensionTemplate="Default_Network_Extension_Universal",
     [Parameter(Mandatory=$false, DontShow)]
         [switch]$JSON
