@@ -570,7 +570,7 @@ Set-DCNMInterface -Fabric site3 -SwitchName LEAF-6 -Interface eth1/10 -Mode Moni
 
 # Use the monitor template on eth1/10 to prevent DCNM from enforcing configuration complaince on that interface
  .EXAMPLE
-(Import-Csv .\Book2.csv)[2..4] | New-DCNMInterface
+(Import-Csv .\Book2.csv)[2..4] | Set-DCNMInterface
 
 # Use a CSV file with headers corresponding to parameters to bulk-import interface configurations
  .PARAMETER Fabric
@@ -625,10 +625,10 @@ param
 
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
         [Alias("ifName")]
-        [string]$Interface,
+            [string]$Interface,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-            [string]$PortDescription="",
+            [string]$Description="",
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateSet("true","false")]
@@ -1714,7 +1714,7 @@ Process {
 $uri      = "$Global:DCNMHost/rest/globalInterface"
 if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric | Out-Null}
 $nvPairs = New-Object -TypeName psobject
-$int      = New-Object -TypeName psobject
+$int     = New-Object -TypeName psobject
 $body    = New-Object -TypeName psobject
 
 $nvPairs | Add-Member -Type NoteProperty -Name PEER1_PCID                   -Value $ID
