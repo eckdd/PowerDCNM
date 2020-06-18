@@ -743,7 +743,7 @@ if ($Mode -eq 'Access')  {
 if ($Mode -eq 'Trunk')   {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_trunk_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
     $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
     $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
