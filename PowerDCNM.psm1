@@ -733,7 +733,7 @@ $nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE                -Value
 if ($Mode -eq 'Access')  {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_access_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
     $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
     $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
@@ -753,7 +753,7 @@ if ($Mode -eq 'Trunk')   {
 if ($Mode -eq 'Routed')  {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_routed_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
-    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $PortDescription
+    $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
     $nvPairs | Add-Member -Type NoteProperty -Name INTF_VRF                 -Value $VRF
     $nvPairs | Add-Member -Type NoteProperty -Name IP                       -Value ($Prefix.Split('/')[0])
     $nvPairs | Add-Member -Type NoteProperty -Name PREFIX                   -Value ($Prefix.Split('/')[1])
