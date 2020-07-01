@@ -1435,7 +1435,7 @@ Creates a network in a fabric
  .DESCRIPTION
 This cmdlet will invoke a REST POST against the DCNM Top Down LAN Network Operations API
  .EXAMPLE
-New-DCNMNetwork -Fabric site1 -vrf myVRF1 -Name myNetwork1 -VNI 30001 -VlanID -VlanName test -GatewayIPv4 '10.10.10.1' 
+New-DCNMNetwork -Fabric site1 -vrf myVRF1 -Name myNetwork1 -VNI 30001 -VlanID 2030 -VlanName test -GatewayIPv4 '10.10.10.1' 
  .EXAMPLE
 (Import-Csv .\Book2.csv) | New-DCNMNetwork
  .PARAMETER Fabric
