@@ -70,7 +70,7 @@ $Global:DCNMHost      = $output.dcnmHost
 $Global:DCNMAuthToken = $output.dcnmToken
 $output        
         }
-End {Remove-Variable -Name DCNM_* -Scope Global}
+End {Remove-Variable -Name DCNM_*,DCNMSwitch* -Scope Global}
 }
 function Remove-DCNMAuthToken        {
 <#
@@ -908,8 +908,8 @@ Name of a fabric
 /#>
 param
     (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-            [string]$Fabric,
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+            [string]$fabricName,
         [Parameter(Mandatory=$false)]
             [switch]$NoSync,
         [Parameter(Mandatory=$false, DontShow)]
@@ -918,7 +918,7 @@ param
 Begin   {}
 Process {
 if ($NoSync) {$SyncFlag = 'false'} else {$SyncFlag = 'true'}
-$uri  = "$Global:DCNMHost/rest/control/fabrics/$Fabric/config-deploy?forceShowRun=$SyncFlag"
+$uri  = "$Global:DCNMHost/rest/control/fabrics/$fabricName/config-deploy?forceShowRun=$SyncFlag"
    if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
     $response = New-DCNMObject -uri $uri ; $response}
         }
@@ -1435,7 +1435,7 @@ Creates a network in a fabric
  .DESCRIPTION
 This cmdlet will invoke a REST POST against the DCNM Top Down LAN Network Operations API
  .EXAMPLE
-New-DCNMNetwork -Fabric site1 -vrf myVRF1 -Name myNetwork1 -VNI 30001 -VlanID 2030 -VlanName test -GatewayIPv4 '10.10.10.1' 
+New-DCNMNetwork -Fabric site1 -vrf myVRF1 -Name myNetwork1 -VNI 30001 -VlanID -VlanName test -GatewayIPv4 '10.10.10.1' 
  .EXAMPLE
 (Import-Csv .\Book2.csv) | New-DCNMNetwork
  .PARAMETER Fabric
