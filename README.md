@@ -35,10 +35,14 @@ copy ".\master\PowerDCNM-master\\*" -Container PowerDCNM -Force
 del .\master\ -Force -Recurse
 
 del .\master.zip
+
+Import-Module PowerDCNM -Force
 #
 #
 
 # Usage 
+NOTE: You may need to update the PowerShell execution policy with the following:
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope CurrentUser
 
 Begin by generating  an Auth Access Token with the New-DCNMAuthToken function. This will prompt for the DCNM host URL and credentials with API access. Once ran, a token valid for 60 minutes will be stored in the current PowerShell session environment and all other functions can be used without specifying the token, domain, or DCNM host.
 Get-Command -Module PowerDCNM will display all the functions available in this module. Use Get-Help with the name of the function followed by -Examples to see examples of usage.
