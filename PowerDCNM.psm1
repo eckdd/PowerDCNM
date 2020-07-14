@@ -726,7 +726,7 @@ if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMS
 $body    = New-Object -TypeName psobject
 $nvPairs = New-Object -TypeName psobject
 $nvPairs | Add-Member -Type NoteProperty -Name CONF                       -Value $CliFreeform
-$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE                -Value $Enabled
+$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE                -Value $Enabled.ToLower()
 
 
 if ($Mode -eq 'Access')  {
@@ -1221,7 +1221,7 @@ $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED  -Value $Po
 $nvPairs | Add-Member -Type NoteProperty -Name MTU                    -Value $MTU
 $nvPairs | Add-Member -Type NoteProperty -Name MEMBER_INTERFACES      -Value $Members
 $nvPairs | Add-Member -Type NoteProperty -Name PO_ID                  -Value "Port-channel$ID"
-$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE            -Value $Enabled
+$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE            -Value $Enabled.ToLower()
 $nvPairs | Add-Member -Type NoteProperty -Name CONF                   -Value $CliFreeform
 
 
@@ -1340,7 +1340,7 @@ $nvPairs | Add-Member -Type NoteProperty -Name FABRIC_NAME            -Value $Fa
 $nvPairs | Add-Member -Type NoteProperty -Name DESC                   -Value $Description
 $nvPairs | Add-Member -Type NoteProperty -Name INTF_NAME              -Value ($ParentInterface + '.' + $SubinterfaceID)
 $nvPairs | Add-Member -Type NoteProperty -Name MTU                    -Value $MTU
-$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE            -Value $Enabled
+$nvPairs | Add-Member -Type NoteProperty -Name ADMIN_STATE            -Value $Enabled.ToLower()
 $nvPairs | Add-Member -Type NoteProperty -Name INTF_VRF               -Value $VRF
 $nvPairs | Add-Member -Type NoteProperty -Name CONF                   -Value $CliFreeform
 
