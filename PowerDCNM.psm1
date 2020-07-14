@@ -619,7 +619,7 @@ param
             [string]$Fabric,
 
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
-        [Alias("sysName")]
+        [Alias("sysName","logicalName")]
             [string]$SwitchName,
 
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
@@ -959,15 +959,17 @@ Leaves changes pending deployment
 /#>
 param
     (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [string]$Network,
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("fabricName")]
             [string]$Fabric,
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("logicalName")]
             [string]$Switch,
-        [Parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$Interface,
-        [Parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$DetatchInterface,
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [bool]$Untagged=$false,
