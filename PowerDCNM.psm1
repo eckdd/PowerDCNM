@@ -746,7 +746,7 @@ if ($Mode -eq 'Trunk')   {
     $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
     $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
-    $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS            -Value $AllowedVLANs
+    $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS            -Value $AllowedVLANs.Replace(' ','')
     }
 
 if ($Mode -eq 'Routed')  {
@@ -983,6 +983,9 @@ param
             [switch]$RemoveNetwork,
         [Parameter(Mandatory=$false)]
             [switch]$DoNotDeploy,
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+            [string]$CliFreeform,
+
         [Parameter(Mandatory=$false, DontShow)]
             [switch]$JSON
     )
@@ -990,7 +993,7 @@ Begin   {
 $lanAttachList = @()
 }
 Process {
-if (!(Get-Variable DCNMSwitch_$Fabric)) {Get-DCNMSwitch -fabricName $Fabric | Out-Null}
+if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric | Out-Null}
 
 $lanAttach = New-Object -TypeName psobject
 $lanAttach | Add-Member -Type NoteProperty -Name fabric       -Value $Fabric
@@ -1002,6 +1005,7 @@ $lanAttach | Add-Member -Type NoteProperty -Name vlan               -Value $Acce
 $lanAttach | Add-Member -Type NoteProperty -Name dot1QVlan          -Value $TrunkVLAN
 $lanAttach | Add-Member -Type NoteProperty -Name untagged           -Value $Untagged
 $lanAttach | Add-Member -Type NoteProperty -Name deployment         -Value (!$RemoveNetwork)
+$lanAttach | Add-Member -Type NoteProperty -Name freeformConfig     -Value $CliFreeform
 
 $lanAttachList += $lanAttach
         }
@@ -1027,7 +1031,7 @@ foreach ($fab in $Fabrics) {
   }
    if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject @($body) -Depth 10) ; $Global:DCNM_JSON} else {
     $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject @($body) -Depth 10) ; $response 
-    if ((Select-Object -InputObject $response -ExpandProperty *) -eq 'SUCCESS' -and !$DoNotDeploy) {
+    if ((Select-Object -InputObject $response -ExpandProperty * -ErrorAction SilentlyContinue) -eq 'SUCCESS' -and !$DoNotDeploy) {
      foreach ($net in $body.networkName) {
       Deploy-DCNMNetwork -Network $net -Fabric $fab
      }
@@ -1099,12 +1103,8 @@ Sets either the default (1500) MTU size, or jumbo frame MTU (9216)
 Interface description
  .PARAMETER Enabled
 Enable or disable interface after creation
- .PARAMETER Access
-Configures an access port-channel
- .PARAMETER Trunk
-Configures a trunking port-channel
- .PARAMETER Layer3
-Configures a routed/layer-3 port-channel
+ .PARAMETER PortType
+Configure port as access, trunk, or routed
  .PARAMETER AccessVLAN
 Sets the access port VLAN for an access port-channel
  .PARAMETER AllowedVLANs
@@ -1121,60 +1121,62 @@ param
     (
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [string]$Fabric,
+
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [string]$SwitchName,
+
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
         [ValidateRange(1,4096)]
             [int]$ID,
+
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [string]$Members,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [ValidateSet("Active","Passive","On")]
-            [string]$Mode="Active",
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [ValidateSet("true","false")]
-           [string]$BPDUGuard="true",
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [ValidateSet("true","false")]
-              [string]$PortFast="true",
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [ValidateSet("jumbo","default")]
-            [string]$MTU="jumbo",
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-            [string]$Description,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [ValidateSet("true","false")]
-            [string]$Enabled="true",
+
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("Access","Monitor","Routed","Trunk")]
+            [string]$PortType,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Access')]
-            [switch]$Access,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateRange(1,4094)]
-        [Parameter(ParameterSetName='Access')]
             [int]$AccessVLAN,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Trunk')]
-            [switch]$Trunk,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Trunk')]
             [string]$AllowedVLANs,
             
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
-            [switch]$Layer3,
-        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
             [string]$VRF,
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
-        [Parameter(ParameterSetName='Layer3')]
         [ValidatePattern('(\d+\.){3}\d+\/\d+')]
             [string]$Prefix,
-        [Parameter(ParameterSetName='Layer3')]
+
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
         [ValidateRange(0,4294967295)]
             [string]$Tag,
+
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("Active","Passive","On")]
+                [string]$Mode="Active",
+    
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("true","false")]
+               [string]$BPDUGuard="true",
+    
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("true","false")]
+                  [string]$PortFast="true",
+    
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("jumbo","default")]
+                [string]$MTU="jumbo",
+    
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+                [string]$Description="",
+    
+        [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [ValidateSet("true","false")]
+                [string]$Enabled="true",
+    
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
             [string]$CliFreeform,
          
@@ -1189,18 +1191,18 @@ if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMS
 $nvPairs = New-Object -TypeName psobject
 $body    = New-Object -TypeName psobject
 
-if ($Monitor) {
+if ($PortType -eq 'Monitor') {
     $templateName = 'int_monitor_port_channel_11_1'
     }
-if ($Access)  {
+if ($PortType -eq 'Access')  {
     $templateName = 'int_port_channel_access_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name ACCESS_VLAN -Value $AccessVLAN
     }
-if ($Trunk)   {
+if ($PortType -eq 'Trunk')   {
     $templateName = 'int_port_channel_trunk_host_11_1'
-    $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS -Value $AllowedVLANs
+    $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS -Value $AllowedVLANs.Replace(' ','')
     }
-if ($Layer3)  {
+if ($PortType -eq 'Routed')  {
     $templateName = 'int_l3_port_channel'
     if ($VRF){
     $nvPairs | Add-Member -Type NoteProperty -Name INTF_VRF      -Value $VRF}
@@ -1215,8 +1217,7 @@ if ($Layer3)  {
 $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED      -Value $BPDUGuard
 $nvPairs | Add-Member -Type NoteProperty -Name PC_MODE                -Value $Mode.ToLower()
 $nvPairs | Add-Member -Type NoteProperty -Name FABRIC_NAME            -Value $Fabric
-if ($Description) {
-$nvPairs | Add-Member -Type NoteProperty -Name DESC                   -Value $Description}
+$nvPairs | Add-Member -Type NoteProperty -Name DESC                   -Value $Description
 $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED  -Value $PortFast
 $nvPairs | Add-Member -Type NoteProperty -Name MTU                    -Value $MTU
 $nvPairs | Add-Member -Type NoteProperty -Name MEMBER_INTERFACES      -Value $Members
@@ -1233,7 +1234,6 @@ $body | Add-Member -Type NoteProperty -name entityName          -Value "port-cha
 $body | Add-Member -Type NoteProperty -name templateName        -Value $templateName
 $body | Add-Member -Type NoteProperty -name templateContentType -Value 'PYTHON'
 $body | Add-Member -Type NoteProperty -name nvPairs             -Value $nvPairs
-
 
     if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
         $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject $body -Depth 10) ; $response}
@@ -1735,8 +1735,8 @@ if ($PortType -eq 'Access')  {
     }
 if ($PortType -eq 'Trunk')   {
     $templateName = 'int_vpc_trunk_host_11_1'
-    $nvPairs | Add-Member -Type NoteProperty -Name PEER1_ALLOWED_VLANS -Value $AllowedVLANs
-    $nvPairs | Add-Member -Type NoteProperty -Name PEER2_ALLOWED_VLANS -Value $AllowedVLANs
+    $nvPairs | Add-Member -Type NoteProperty -Name PEER1_ALLOWED_VLANS -Value $AllowedVLANs.Replace(' ','')
+    $nvPairs | Add-Member -Type NoteProperty -Name PEER2_ALLOWED_VLANS -Value $AllowedVLANs.Replace(' ','')
     }
 
 $nvPairs | Add-Member -Type NoteProperty -Name PEER1_PO_DESC           -Value $Peer1Description
@@ -1770,5 +1770,89 @@ Remove-Variable -Name int,ifs,nvpairs,body -ErrorAction SilentlyContinue
 }    
 
 End     {}
+ 
+}
+
+function Set-DCNMInterfaceAdminState         {
+    <#
+ .SYNOPSIS
+Perform a shutdown/no shutdonw on interfaces
+ .DESCRIPTION
+This cmdlet will invoke a REST POST against the DCNM Interface adminstatus
+ .EXAMPLE
+Set-DCNMInterface -Fabric site3 -SwitchName SPINE-4 -Interface ethernet1/19 -Enabled false
+ .EXAMPLE
+Set-DCNMInterface -Fabric site3 -SwitchName LEAF-12 -Interface vlan100 -Enabled true
+ .EXAMPLE
+Set-DCNMInterface -Fabric site3 -SwitchName AG-2 -Interface vlan100,vlan200,eth1/100 -Enabled false
+ .PARAMETER Fabric
+Name of the fabric
+ .PARAMETER SwitchName
+Name of the switch
+ .PARAMETER Interface
+Full interface name
+ .PARAMETER Enabled
+Enables or disables the interfaces; true or false
+ /#>
+param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("fabricName")]
+            [string]$Fabric,
+
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("sysName","logicalName")]
+            [string]$SwitchName,
+
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("ifName")]
+            [string]$Interface,
+
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("true","false")]
+            [string]$Enabled,
+
+        [Parameter(Mandatory=$false, DontShow)]
+            [switch]$JSON
+    )
+Begin   {
+    $ifShut = @()
+    $ifNoSh = @()
+}
+Process {
+
+    $uri      = "$Global:DCNMHost/rest/interface/adminstatus"
+    if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric}
+    $serial = ((Get-Variable DCNMSwitch_$Fabric -ValueOnly) | Where-Object -Property logicalName -EQ $SwitchName).serialNumber
+    [string]$Interface = $Interface.Split(',')
+    foreach ($i in $Interface) {
+        $i = $i.ToLower().Replace('eth','ethernet')
+        $ifName = New-Object -TypeName psobject
+        $ifName | Add-Member -Type NoteProperty -Name serialNumber  -Value $serial
+        $ifName | Add-Member -Type NoteProperty -Name ifName        -Value $i
+        if ($Enabled -eq 'true')  {$ifNoSh += $ifName}
+        if ($Enabled -eq 'false') {$ifShut += $ifName}
+
+ }
+}    
+
+End     {
+
+    if ($ifNoSh) {
+        $body = New-Object -TypeName psobject
+        $body | Add-Member -Type NoteProperty -Name operation  -Value noshut
+        $body | Add-Member -Type NoteProperty -Name interfaces -Value $ifNosh
+        if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
+            $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject $body -Depth 10) ; $response}
+    }
+    if ($ifShut) {
+        $body = New-Object -TypeName psobject
+        $body | Add-Member -Type NoteProperty -Name operation  -Value shut
+        $body | Add-Member -Type NoteProperty -Name interfaces -Value $ifShut
+        if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
+            $response = New-DCNMObject -uri $uri -object (ConvertTo-Json -InputObject $body -Depth 10) ; $response}
+    }
+
+}
  
 }
