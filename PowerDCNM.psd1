@@ -77,8 +77,9 @@ FunctionsToExport =
     "Get-DCNMSwitch",
     "Get-DCNMInterface",
     "Get-DCNMNetwork",
-    "Get-DCNMNetworkAttachments",
+    "Get-DCNMNetworkAttachment",
     "Set-DCNMNetwork",
+    "Set-DCNMNetworkAttachment",
     "New-DCNMObject",
     "Deploy-DCNMNetwork",
     "Deploy-DCNMFabric",
@@ -93,7 +94,8 @@ FunctionsToExport =
     "Set-DCNMInterface",
     "New-DCNMNetwork",
     "New-DCNMvPC",
-    "Set-DCNMInterfaceAdminState"
+    "Set-DCNMInterfaceAdminState",
+    "Set-DCNMObject"
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
