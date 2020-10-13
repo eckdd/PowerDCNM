@@ -2,7 +2,7 @@
 # PowerDCNM
 PowerShell REST client for Cisco Data Center Network Manager (DCNM) version 11
 
-The functions in this module invoke REST calls to the FMC API enabling the bulk creation and management of objects and policies.
+The functions in this module invoke REST calls to the DCNM API enabling the bulk creation and management of objects and policies.
 
 USE AT YOUR OWN RISK! 
 This module is still under development and any feature may or may not work as intended.
