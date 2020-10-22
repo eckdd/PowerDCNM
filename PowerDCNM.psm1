@@ -362,7 +362,7 @@ $headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json" 
  try {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Put -Uri $uri -Headers $headers -Body $object
-  } else { $response = Invoke-RestMethod -Method Put -Uri $uri -Headers $headers -Body $object }
+  } else { $response = Invoke-RestMethod              -Method Put -Uri $uri -Headers $headers -Body $object }
  } catch {
   $message = $_.Exception.Message
   if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
@@ -936,6 +936,9 @@ Set-DCNMNetworkAttachment -Fabric SITE-3 -Network MyNetwork_30001 -Switch Leaf2 
 Set-DCNMNetworkAttachment -Fabric SITE-3 -Network MyNetwork_30001 -Switch Leaf2 -DetatchInterface Ethernet1/10
  .EXAMPLE
 Set-DCNMNetworkAttachment -Network SHUTDOWN -Fabric SITE-3 -Switch Leaf2 -RemoveNetwork
+ .EXAMPLE
+Get-DCNMSwitch -fabricName dc2 | ? {$_.switchRole -eq 'leaf'} | foreach {
+>> Get-DCNMNetwork -Fabric msd | Set-DCNMNetworkAttachment -Fabric dc2 -Switch $_.logicalName}
  .PARAMETER Network
 Name of the Network
  .PARAMETER Fabric
@@ -960,6 +963,7 @@ Leaves changes pending deployment
 param
     (
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("networkName")]
             [string]$Network,
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
         [Alias("fabricName")]
