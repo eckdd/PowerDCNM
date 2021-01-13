@@ -30,7 +30,7 @@ CompanyName = 'Cisco Systems, Inc.'
 Copyright = '(c) 2018, Cisco Systems, Inc. and/or its affiliates. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = 'REST Client for Cisco Firepower Management Console API'
+Description = 'REST Client for Cisco Datacenter Network Manager API'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = '5.1'
@@ -95,7 +95,10 @@ FunctionsToExport =
     "New-DCNMNetwork",
     "New-DCNMvPC",
     "Set-DCNMInterfaceAdminState",
-    "Set-DCNMObject"
+    "Set-DCNMObject",
+    "New-DCNMVlanInterface",
+    "New-DCNMVRF",
+    "Set-DCNMVlanInterface"
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
