@@ -130,7 +130,8 @@ $body   =@()
 }
 Process {
     if ($IsLayer2Only -eq 'true') {$VRF = 'NA'}
-
+    if (!$Global:DCNMFabrics) {Get-DCNMFabric}
+    if (($Global:DCNMFabrics | Where-Object {$_.fabricName -eq $Fabric}).fabricType -eq 'MFD') {[boolean]$msd = $true}
     $netconfig  = @()
     $netconfig += "`"gatewayIpAddress`":`"$GatewayIPv4`","
     $netconfig += "`"gatewayIpV6Address`":`"$GatewayIPv6`","
@@ -140,7 +141,7 @@ Process {
     $netconfig += "`"secondaryGW1`":`"$SecondaryGW1`","
     $netconfig += "`"secondaryGW2`":`"$SecondaryGW2`","
     $netconfig += "`"suppressArp`":$SuppressARP,"
-    $netconfig += "`"enableIR`":$IR,"
+    if (!$msd) {$netconfig += "`"enableIR`":$IR,"}
     $netconfig += "`"trmEnabled`":$TRM,"
     $netconfig += "`"rtBothAuto`":$RTBothAuto,"
     $netconfig += "`"enableL3OnBorder`":$EnableL3onBorder,"
@@ -171,6 +172,7 @@ Process {
     $LanNet | Add-Member -Type NoteProperty -Name 'serviceNetworkTemplate'      -Value $null
 
     $body += $LanNet
+    Remove-Variable -Name msd -ErrorAction SilentlyContinue | Out-Null
         }
 End     {
     if ($JSON) {$uri ; $Global:DCNM_JSON = (ConvertTo-Json -InputObject $body -Depth 10) ; $Global:DCNM_JSON} else {
