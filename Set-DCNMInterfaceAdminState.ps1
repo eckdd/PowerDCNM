@@ -33,7 +33,7 @@ param
         [Alias("sysName","logicalName")]
             [string]$SwitchName,
 
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true, ValueFromPipeline=$true)]
         [Alias("ifName")]
             [string]$Interface,
 
@@ -47,7 +47,7 @@ Begin   {
 Process {
 
     $uri      = "$Global:DCNMHost/rest/interface/adminstatus"
-    if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric}
+    if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric | Out-Null}
     $serial = ((Get-Variable DCNMSwitch_$Fabric -ValueOnly) | Where-Object -Property logicalName -EQ $SwitchName).serialNumber
     [string]$Interface = $Interface.Split(',')
     foreach ($i in $Interface) {
