@@ -25,7 +25,7 @@ Begin   {}
 Process {
 $uri = "$Global:DCNMHost/rest/control/fabrics/$FabricName/inventory"
 $response = Get-DCNMObject -uri $uri
-$response | Where-Object {($_.switchName -like $SwitchName -and $_.switchRole -like $SwitchRole.ToLower())}
+$response | Where-Object {($_.hostName -like $SwitchName -and $_.switchRole -like $SwitchRole.ToLower())}
         }
 End     {
 if ($response) {New-Variable -Scope Global -Name DCNMSwitch_$fabricName -Value $response -Force}
