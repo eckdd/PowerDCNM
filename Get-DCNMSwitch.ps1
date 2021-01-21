@@ -15,6 +15,9 @@ param
     (
         [Parameter(Mandatory=$false)]
             [string]$SwitchName="*",
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("Spine","Leaf","Border","Border Spine","Border Gateway","Border Gateway Spine","Super Spine","Border Super Spine","Border Gateway Super Spine","Access","Aggregation","Edge Router","Core Router","ToR","*")]
+            [string]$SwitchRole="*",
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [string]$fabricName
     )
@@ -22,7 +25,7 @@ Begin   {}
 Process {
 $uri = "$Global:DCNMHost/rest/control/fabrics/$FabricName/inventory"
 $response = Get-DCNMObject -uri $uri
-$response | Where-Object -Property logicalName -Like $SwitchName
+$response | Where-Object {($_.switchName -like $SwitchName -and $_.switchRole -like $SwitchRole.ToLower())}
         }
 End     {
 if ($response) {New-Variable -Scope Global -Name DCNMSwitch_$fabricName -Value $response -Force}
