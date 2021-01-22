@@ -149,7 +149,7 @@ Begin   {
 }
 Process {
 [string]$Interface = $Interface.ToLower().Replace('ethernet','eth')
-
+[string]$PortFast  = $PortFast.ToLower()
     $ifNames = @()
     foreach ($EthMod in $Interface.split('eth', [System.StringSplitOptions]::RemoveEmptyEntries)) {
         if ($EthMod.Split('/')[2]) {
