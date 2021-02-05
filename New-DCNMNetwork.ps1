@@ -61,6 +61,7 @@ param
         [string]$Fabric,
     [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
     [Alias("networkName")]
+    [Alias("Network")]
     [string]$Name,            
     [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
         [int]$VNI,            

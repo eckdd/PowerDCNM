@@ -40,6 +40,7 @@ function Set-DCNMNetworkAttachment   {
         (
             [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [Alias("networkName")]
+            [Alias("Name")]
                 [string]$Network,
             [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
             [Alias("fabricName")]

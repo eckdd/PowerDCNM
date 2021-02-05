@@ -116,6 +116,8 @@ Begin   {
 }
 Process {
 $uri      = "$Global:DCNMHost/rest/control/policies"
+[string]$PortFast  = $PortFast.ToLower()
+
 if (!(Get-Variable DCNMSwitch_$Fabric -ErrorAction SilentlyContinue)) {Get-DCNMSwitch -fabricName $Fabric | Out-Null}
 $nvPairs = New-Object -TypeName psobject
 $body    = New-Object -TypeName psobject

@@ -91,6 +91,7 @@ param
         [AllowNull()] 
         [AllowEmptyCollection()]
         [ValidatePattern('(\d+\.){3}\d+\/\d+')]
+        [Alias("ipAddress")]
             [string]$Prefix,
 
         [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
