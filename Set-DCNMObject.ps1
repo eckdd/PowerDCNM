@@ -48,7 +48,7 @@ $headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json"}
  try {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Put -Uri $uri -Headers $headers -Body $object
-  } else { $response = Invoke-RestMethod              -Method Put -Uri $uri -Headers $headers -Body $object }
+  } else { $response = Invoke-RestMethod              -Method Put -Uri $uri -Headers $headers -Body $object -UseBasicParsing}
  } catch {
   $message = $_.Exception.Message
   if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
@@ -58,7 +58,10 @@ $headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json"}
   if ($message -eq 'Response status code does not indicate success: 401 (Unauthorized).') {
   Write-Host $message -ForegroundColor Yellow
   New-DCNMAuthToken -DCNMHost $env:DCNMHost
-   }  
+   }  else {
+    Write-Host $_.Exception.Message     -ForegroundColor Yellow
+    Write-Host $_.ErrorDetails.Message  -ForegroundColor Yellow
+   }
  }
 
         }

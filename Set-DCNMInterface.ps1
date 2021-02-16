@@ -195,8 +195,8 @@ if ($Mode -eq 'Access')  {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_access_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
     $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
-    $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
-    $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
+    $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard.ToLower()
+    $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast.ToLower()
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
     $nvPairs | Add-Member -Type NoteProperty -Name ACCESS_VLAN              -Value $AccessVLAN
     }
@@ -205,8 +205,8 @@ if ($Mode -eq 'Trunk')   {
     $body    | Add-Member -Type NoteProperty -Name policy                   -Value 'int_trunk_host_11_1'
     $nvPairs | Add-Member -Type NoteProperty -Name SPEED                    -Value $Speed
     $nvPairs | Add-Member -Type NoteProperty -Name DESC                     -Value $Description
-    $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard
-    $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast
+    $nvPairs | Add-Member -Type NoteProperty -Name BPDUGUARD_ENABLED        -Value $BPDUGuard.ToLower()
+    $nvPairs | Add-Member -Type NoteProperty -Name PORTTYPE_FAST_ENABLED    -Value $PortFast.ToLower()
     $nvPairs | Add-Member -Type NoteProperty -Name MTU                      -Value $MTU_L2
     $nvPairs | Add-Member -Type NoteProperty -Name ALLOWED_VLANS            -Value $AllowedVLANs.Replace(' ','')
     }

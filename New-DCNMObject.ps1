@@ -43,16 +43,24 @@ add-type @"
 }
          
 Process {
-$headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json" ; 'Accept' = "application/json"}
+$headers = @{'dcnm-token' = "$AuthToken" ; 'content-type' = "application/json" ; 'Accept' = "application/json"}
+
+try {
+
 if ($body) {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Post -Uri $uri -Headers $headers -Body $object
-  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $object }
+  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $object -UseBasicParsing}
  } else {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Post -Uri $uri -Headers $headers
-  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers }
+  } else { $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -UseBasicParsing}
  }
+} catch {
+    Write-Host $_.Exception.Message     -ForegroundColor Yellow
+    Write-Host $_.ErrorDetails.Message  -ForegroundColor Yellow
+} 
+
         }
 End     {
 $response

@@ -40,21 +40,14 @@ add-type @"
 Process {
 
 $headers = @{ 'dcnm-token' = "$AuthToken" ; 'content-type' = "application/x-www-form-urlencoded" ; 'cache-control' = "no-cache"}
-#try {
+try {
   if ($IsCore -eq $true) {
   $response = Invoke-RestMethod -SkipCertificateCheck -Method Delete -Uri $uri -Headers $headers
-  } else { $response = Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers }
- #} catch {
- # $message = $_.Exception.Message
- # if ($message -eq 'Invalid URI: The hostname could not be parsed.') {
- # Write-Host $message -ForegroundColor Yellow
- # New-DCNMAuthToken
- #  }  
- # if ($message -eq 'Response status code does not indicate success: 401 (Unauthorized).') {
- # Write-Host $message -ForegroundColor Yellow
- # New-DCNMAuthToken -DCNMHost $env:DCNMHost
- #  }  
- #}
+  } else { $response = Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers -UseBasicParsing}
+} catch {
+    Write-Host $_.Exception.Message     -ForegroundColor Yellow
+    Write-Host $_.ErrorDetails.Message  -ForegroundColor Yellow
+} 
 
         }
 End     {

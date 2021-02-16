@@ -55,10 +55,12 @@ $headers = @{ Authorization = "Basic $encodedCredentials" ; 'Content-Type' = 'ap
 try {
  if ($IsCore -eq $true) {
  $AuthResponse = Invoke-WebRequest -SkipCertificateCheck -Uri $uri -Headers $headers -Method Post -Body ($body | ConvertTo-Json) -ErrorAction Stop
- } else {$AuthResponse = Invoke-WebRequest -Uri $uri -Headers $headers -Method Post -Body ($body | ConvertTo-Json) -ErrorAction Stop
+ } else {$AuthResponse = Invoke-WebRequest -Uri $uri -Headers $headers -Method Post -Body ($body | ConvertTo-Json) -ErrorAction Stop -UseBasicParsing
  }
 } catch {
-  Write-Host $_.ErrorDetails.Message -ForegroundColor Yellow} 
+    Write-Host $_.Exception.Message     -ForegroundColor Yellow
+    Write-Host $_.ErrorDetails.Message  -ForegroundColor Yellow
+} 
 
 $AuthToken = ($AuthResponse.Content.Trim('{|}').Split(':'))[1].Trim('"')
 
