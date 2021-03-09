@@ -25,3 +25,4 @@
 . $psScriptRoot\Set-DCNMNetworkAttachment.ps1
 . $psScriptRoot\Set-DCNMObject.ps1
 . $psScriptRoot\New-DCNMVRF.ps1
+. $psScriptRoot\New-DCNMFexLink.ps1
