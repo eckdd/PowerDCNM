@@ -71,5 +71,5 @@ $Global:DCNMHost      = $output.dcnmHost
 $Global:DCNMAuthToken = $output.dcnmToken
 $output        
         }
-End {Remove-Variable -Name DCNM_*,DCNMSwitch* -Scope Global}
+End {Remove-Variable -Name DCNM_*,DCNMSwitch*,DCNMFabric* -Scope Global}
 }
