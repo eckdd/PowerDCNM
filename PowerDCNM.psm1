@@ -26,3 +26,4 @@
 . $psScriptRoot\Set-DCNMObject.ps1
 . $psScriptRoot\New-DCNMVRF.ps1
 . $psScriptRoot\New-DCNMFexLink.ps1
+. $psScriptRoot\New-DCNMVlan.ps1
