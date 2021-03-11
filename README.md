@@ -16,7 +16,7 @@ This module was developed in PowerShell version 6 on Windows 10.
 This module should be backwards compatible with PowerShell version 5.1
 Data Center Network Manager 11
 
-# Setup/Update
+# Setup/Update (Windows)
 
 Paste the following in PowerShell:
 #
@@ -39,7 +39,29 @@ del .\master.zip
 Import-Module PowerDCNM -Force
 #
 #
+# Setup/Update (Mac/Linux)
 
+Paste the following in PowerShell:
+#
+md ($env:PSModulePath -split ':')[0]
+
+cd ($env:PSModulePath -split ':')[0]
+
+wget https://github.com/eckdd/PowerDCNM/archive/master.zip
+
+Expand-Archive -Path ./master.zip
+
+md PowerDCNM
+
+copy ./master/PowerDCNM-master/* -Container PowerDCNM -Force
+
+del .\master\ -Force -Recurse
+
+del .\master.zip
+
+Import-Module PowerDCNM -Force
+#
+#
 # Usage 
 NOTE: You may need to update the PowerShell execution policy with the following:
 
