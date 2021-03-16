@@ -5,9 +5,9 @@ Initiates a push of a DCNM policy to the device it is assign to
  .DESCRIPTION
 This cmdlet will invoke a REST post against the policies/deploy DCNM API
  .EXAMPLE
-Deploy-DCNMPolicy -PolicyID POLICY-212380
+Push-DCNMPolicy -PolicyID POLICY-212380
  .EXAMPLE
-Get-DCNMSwitch -fabricName Access | Get-DCNMSwitchPolicy | ? {$_.templateName -eq "nfm_switch_user"} | Deploy-DCNMPolicy
+Get-DCNMSwitch -fabricName Access | Get-DCNMSwitchPolicy | ? {$_.templateName -eq "nfm_switch_user"} | Push-DCNMPolicy
  .PARAMETER PolicyID
 PolicyID
 /#>
