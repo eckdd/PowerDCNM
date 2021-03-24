@@ -5,9 +5,9 @@ Creates a new VLAN
  .DESCRIPTION
 This cmdlet will invoke a REST POST against the DCNM policies > bulk-create API
  .EXAMPLE
-New-DCNMVlan -Fabric site1 -SwitchName SW-1 -VlanName TEST_VLAN -VlanID 1126
+New-DCNMVlan -Fabric site1 -Switch SW-1 -VlanName TEST_VLAN -VlanID 1126
  .EXAMPLE
-New-DCNMVlan -Fabric site2 -SwitchName 'Leaf-2,Leaf-3' -VlanName TEST_VLAN2 -VlanID 101 -VNI 30303
+New-DCNMVlan -Fabric site2 -Switch 'Leaf-2,Leaf-3' -VlanName TEST_VLAN2 -VlanID 101 -VNI 30303
  .EXAMPLE
 Get-DCNMSwitch -fabricName site3 -SwitchRole Leaf | New-DCNMVlan -VlanName SomeVlan -VlanID 2020 -Mode FabricPath
  .PARAMETER Fabric
@@ -30,10 +30,12 @@ param
         [string]$SwitchName,
 
     [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
+        [Alias("Name")]
         [string]$VlanName,     
 
     [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
     [ValidateRange(2,3967)]
+        [Alias("Id")]
         [int]$VlanID,  
         
     [Parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)]
