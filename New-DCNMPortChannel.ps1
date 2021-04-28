@@ -49,9 +49,11 @@ Configrues a numeric route tag value (0-4294967295) for a layer3 port-channel pr
 param
     (
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+            [Alias("fabricName")]
             [string]$Fabric,
 
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+            [Alias("logicalName")]
             [string]$SwitchName,
 
         [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
