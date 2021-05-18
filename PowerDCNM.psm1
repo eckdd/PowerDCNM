@@ -28,4 +28,4 @@
 . $psScriptRoot\New-DCNMFexLink.ps1
 . $psScriptRoot\New-DCNMVlan.ps1
 . $psScriptRoot\Push-DCNMPolicy.ps1
-. $psScriptRoot\Invoke-DCNMCliCommand
+. $psScriptRoot\Invoke-DCNMCliCommand.ps1
