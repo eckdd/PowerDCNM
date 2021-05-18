@@ -1,4 +1,4 @@
-function Deploy-DCNMFabric           {
+function Invoke-DCNMCliCommand           {
     <#
  .SYNOPSIS
 Executes a command on switches
