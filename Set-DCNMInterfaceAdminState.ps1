@@ -5,11 +5,11 @@ Perform a shutdown/no shutdonw on interfaces
  .DESCRIPTION
 This cmdlet will invoke a REST POST against the DCNM Interface adminstatus
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName SPINE-4 -Interface ethernet1/19 -Enabled false
+Set-DCNMInterfaceAdminState -Fabric site3 -SwitchName SPINE-4 -Interface ethernet1/19 -Enabled false
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName LEAF-12 -Interface vlan100 -Enabled true
+Set-DCNMInterfaceAdminState -Fabric site3 -SwitchName LEAF-12 -Interface vlan100 -Enabled true
  .EXAMPLE
-Set-DCNMInterface -Fabric site3 -SwitchName AG-2 -Interface vlan100,vlan200,eth1/100 -Enabled false
+Set-DCNMInterfaceAdminState -Fabric site3 -SwitchName AG-2 -Interface vlan100,vlan200,eth1/100 -Enabled false
  .PARAMETER Fabric
 Name of the fabric
  .PARAMETER SwitchName
@@ -51,7 +51,7 @@ Process {
     $serial = ((Get-Variable DCNMSwitch_$Fabric -ValueOnly) | Where-Object -Property logicalName -EQ $SwitchName).serialNumber
     [string]$Interface = $Interface.Split(',')
     foreach ($i in $Interface) {
-        $i = $i.ToLower().Replace('eth','ethernet')
+        $i = $i.ToLower().Replace('eth(\d)','ethernet$1')
         $ifName = New-Object -TypeName psobject
         $ifName | Add-Member -Type NoteProperty -Name serialNumber  -Value $serial
         $ifName | Add-Member -Type NoteProperty -Name ifName        -Value $i
