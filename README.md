@@ -17,6 +17,12 @@ This module was written primarily in PowerShell version 6 is intended to be cros
 This module was developed in PowerShell version 6 on Windows 10.
 This module should be backwards compatible with PowerShell version 5.1
 Data Center Network Manager 11
+# Setup/Update with PSGallery (All OSes)
+Install:
+Install-Module PowerDCNM
+
+Update
+Update-Module PowerDCNM
 
 # Setup/Update (Windows)
 
