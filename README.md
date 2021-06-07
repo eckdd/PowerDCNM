@@ -19,9 +19,11 @@ This module should be backwards compatible with PowerShell version 5.1
 Data Center Network Manager 11
 # Setup/Update with PSGallery (All OSes)
 Install:
+
 Install-Module PowerDCNM
 
-Update
+Update:
+
 Update-Module PowerDCNM
 
 # Setup/Update (Windows)
