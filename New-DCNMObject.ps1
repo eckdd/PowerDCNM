@@ -63,6 +63,6 @@ if ($body) {
 
         }
 End     {
-$response
+    $Global:DCNM_RESPONSE = $response ; $response
         }
 }

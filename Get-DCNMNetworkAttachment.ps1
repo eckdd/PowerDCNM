@@ -13,9 +13,11 @@ Name of a network
 /#>
 param
     (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("networkName")]
             [string]$Network,
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Alias("fabricName")]
             [string]$Fabric
     )
 Begin   {}
